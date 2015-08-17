@@ -5,10 +5,12 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
+angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','ngCordova'])
 
-.run(function($ionicPlatform) {
-  $ionicPlatform.ready(function() {
+
+.run(function($ionicPlatform,$cordovaSQLite) {
+  $ionicPlatform.ready(function() {            
+    
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
     if (window.cordova && window.cordova.plugins && window.cordova.plugins.Keyboard) {
@@ -20,6 +22,31 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
       // org.apache.cordova.statusbar required
       StatusBar.styleLightContent();
     }
+      
+      //Load database
+  db = $cordovaSQLite.openDB("nextflow.db");
+        $cordovaSQLite.execute(db, 'CREATE TABLE IF NOT EXISTS Messages (id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT)');
+       
+        $cordovaSQLite.execute(db, 'INSERT INTO Messages (message) VALUES (?)', "test")
+
+      // Execute SELECT statement to load message from database.
+    $cordovaSQLite.execute(db,  'SELECT * FROM Messages ORDER BY id DESC')
+        .then(
+            function(result) {
+                 alert("ran");
+                if (result.rows.length > 0) {
+                     alert("got result");
+                    //$scope.song = result.rows.item(0).message; 
+                    $scope.songName = "song"; 
+                    
+                   // $scope.statusMessage = "Message loaded successful, cheers!";
+                }
+            },
+            function(error) {
+                  alert("no result");
+                $scope.statusMessage = "Error on loading: " + error.message;
+            }
+        );
   });
 })
 
@@ -83,3 +110,5 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
   $urlRouterProvider.otherwise('/tab/dash');
 
 });
+
+
